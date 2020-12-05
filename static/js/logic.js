@@ -15,6 +15,10 @@ L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?acce
 // Load in geojson data
 var link = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geojson'
 
+function markerSize(magnitude){
+  return magnitude * 3;
+}
+
 // color radius
 d3.json(link).then(function(data){
   function styleInfo(features){
@@ -22,7 +26,8 @@ d3.json(link).then(function(data){
       opacity: 0.8,
       fillOpacity: 0.7,
       fillColor: getColor(features.properties.mag),
-      stoke:true,
+      radius: markerSize(features.properties.mag),
+      stoke:false,
       weight: 0.4
 
     };
@@ -56,7 +61,6 @@ d3.json(link).then(function(data){
       radius: 7
       });
     },
-    radius: 5,
     style: styleInfo,
     onEachFeature: function(features, layer){
       layer.bindPopup("Magnitude: " + features.properties.mag + "<br>Location: " + features.properties.place);
@@ -64,6 +68,28 @@ d3.json(link).then(function(data){
   }).addTo(myMap);
 
   // add legend
+  var legend = L.control({position: 'bottomright'});
   
-
+  legend.onAdd = function(){
+    var div = L.DomUtil.create("div", "info legend");
+    var grades = [0, 1, 2, 3, 4, 5];
+    var colors =[
+      '#96e805',
+      '#d0e809',
+      '#ebca09',
+      '#f2a30c',
+      '#e37c27',
+      '#d62727'
+    ];
+  // LOOP Through
+  for (var i=0; i < grades.length; i++){
+    div.innerHTML +=
+    "<i style='background: " + colors[i] + "'></i> " +
+    grades[i] + (grades[i + 1] ? "&ndash;" + grades[i + 1] + "<br>" : "+")
+  }
+  return div;
+  } 
+  
+// add legend to map
+legend.addTo(myMap);
 })
