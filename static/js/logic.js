@@ -1,7 +1,7 @@
 // Creating map object
 var myMap = L.map("map", {
   center: [35.2452, -118.25],
-  zoom: 5
+  zoom: 3
 });
 
 // Adding tile layer
@@ -13,7 +13,7 @@ L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?acce
 }).addTo(myMap);
 
 // Load in geojson data
-var link = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson'
+var link = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geojson'
 
 // color radius
 d3.json(link).then(function(data){
@@ -23,7 +23,7 @@ d3.json(link).then(function(data){
       fillOpacity: 0.7,
       fillColor: getColor(features.properties.mag),
       stoke:true,
-      weight: 0.5
+      weight: 0.4
 
     };
   }
@@ -38,12 +38,32 @@ d3.json(link).then(function(data){
       case magnitude > 3:
         return '#f2a30c';
       case magnitude > 2:
-        return '';
+        return '#ebca09';
       case magnitude >1:
-        return '';
+        return '#d0e809';
       default:
-        return '';
+        return '#96e805';
     }
   }
+
+  // RADIUS
+
+  // GeoJSON Data (circles)
+  L.geoJson(data, {
+    // create circles
+    pointToLayer: function(features, latlng){
+      return L.circleMarker(latlng,{
+      radius: 7
+      });
+    },
+    radius: 5,
+    style: styleInfo,
+    onEachFeature: function(features, layer){
+      layer.bindPopup("Magnitude: " + features.properties.mag + "<br>Location: " + features.properties.place);
+    }
+  }).addTo(myMap);
+
+  // add legend
+  
 
 })
